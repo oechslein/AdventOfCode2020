@@ -46,3 +46,12 @@ def calc_seat_id(seat_code):
     row = int("".join(seat_code[0:7].replace("F", "0").replace("B", "1")), base=2)
     column = int("".join(seat_code[7:10].replace("L", "0").replace("R", "1")), base=2)
     return row * 8 + column
+
+
+print(max(calc_seat_id(seat_code) for seat_code in puzzle_input.strip().split('\n')))
+
+
+seat_ids_in_list = list(sorted(calc_seat_id(seat_code) for seat_code in puzzle_input.strip().split('\n')))
+
+print([curr_seat+1 for curr_seat, next_seat in zip(seat_ids_in_list, seat_ids_in_list[1:])
+       if next_seat != curr_seat+1][0])
