@@ -1,3 +1,6 @@
+import itertools
+from functools import reduce
+
 from day5_input import puzzle_input
 
 
@@ -41,9 +44,7 @@ print(possible_seat_ids)
 #### 1nd binär
 
 def calc_seat_id(seat_code):
-    row = int("".join(seat_code[0:7].replace("F", "0").replace("B", "1")), base=2)
-    column = int("".join(seat_code[7:10].replace("L", "0").replace("R", "1")), base=2)
-    return row * 8 + column
+    return reduce(lambda prev, new: 2 * prev + {"F": 0, "B": 1, "L": 0, "R": 1}[new], seat_code, 0)
 
 
 print(max(calc_seat_id(seat_code) for seat_code in puzzle_input.strip().split('\n')))
