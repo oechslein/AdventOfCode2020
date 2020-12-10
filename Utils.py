@@ -1,4 +1,5 @@
 def multiply(my_list):
-    if not(my_list):
-        return 1
-    return my_list[0] * multiply(my_list[1:])
+    result = 1
+    for elem in my_list:
+        result *= elem
+    return result

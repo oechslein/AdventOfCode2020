@@ -115,8 +115,22 @@ def split_in_3_jump_groups(adapter_list):
 
 
 def get_jolt_combination_amount_fast(my_input):
-    return multiply([get_jolt_combination_amount_slow(adapter_list[1:], adapter_list[0])
+    x = [(len(adapter_list),
+          (pow(2, len(adapter_list) - 2) if len(adapter_list) > 2 else 1),
+          get_jolt_combination_amount_slow(adapter_list[1:], adapter_list[0]), adapter_list)
+         for adapter_list in split_in_3_jump_groups(parse_input(my_input))]
+
+
+    new_sum = multiply((pow(2, len(adapter_list)-2) if len(adapter_list) > 2 else 1)
+                       for adapter_list in split_in_3_jump_groups(parse_input(my_input)))
+    old_sum = multiply([get_jolt_combination_amount_slow(adapter_list[1:], adapter_list[0])
                      for adapter_list in split_in_3_jump_groups(parse_input(my_input))])
+    assert old_sum == new_sum
+    return old_sum
+
+
+for adapter_list in [list(range(i)) for i in range(2, 30)]:
+    print(max(adapter_list), get_jolt_combination_amount_slow(adapter_list[1:], adapter_list[0]))
 
 
 start_time = time.time()
