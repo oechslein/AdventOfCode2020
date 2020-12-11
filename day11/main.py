@@ -2,6 +2,8 @@ import numpy as np
 
 from input import TEST_INPUT, PUZZLE_INPUT
 
+from Utils import count
+
 
 def parse_input(my_input):
     return np.array([list(line) for line in my_input.strip().split('\n')])
@@ -20,11 +22,11 @@ def fulfills_empty(seats: np.ndarray, x: int, y: int):
 
 
 def fulfills_occupied(seats: np.ndarray, x: int, y: int):
-    return sum(1 if seat in ('#',) else 0 for seat in adjacent_seats(seats, x, y)) >= 4
+    return count(seat for seat in adjacent_seats(seats, x, y) if seat in ('#',)) >= 4
 
 
-def count_occupied(seats):
-    return sum(1 for seat in seats.flatten() if seat == '#')
+def count_occupied(seats: np.ndarray):
+    return count(seat for seat in seats.flatten() if seat == '#')
 
 
 def stable_seat_count(seats: np.ndarray):
@@ -82,7 +84,7 @@ def fulfills_empty_2nd(seats: np.ndarray, x: int, y: int):
 
 
 def fulfills_occupied_2nd(seats: np.ndarray, x: int, y: int):
-    return sum(1 if seat in ('#',) else 0 for seat in visible_seats(seats, x, y)) >= 5
+    return count(seat for seat in visible_seats(seats, x, y) if seat in ('#',)) >= 5
 
 
 def stable_seat_count_2nd(seats: np.ndarray):
