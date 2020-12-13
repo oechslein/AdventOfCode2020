@@ -17,19 +17,6 @@ def parse_input(my_input):
            [BusType(offset, int(bus)) for offset, bus in enumerate(busses.split(',')) if bus != 'x']
 
 
-def check_co_primes(my_input: List[BusType]):
-    first_bus = None
-    for bus in my_input:
-        assert is_prime(bus.interval), bus.interval
-        if first_bus is not None:
-            assert is_co_prime(first_bus.interval, bus.interval), (first_bus.interval, bus.interval)
-        first_bus = bus
-
-
-check_co_primes(parse_input(TEST_INPUT)[1])
-check_co_primes(parse_input(PUZZLE_INPUT)[1])
-
-
 def slow_solution(my_input: List[BusType]):
     def fits_schedule(curr_timestamp: int, bus: BusType):
         return ((curr_timestamp + bus.offset) % bus.interval) == 0
@@ -94,7 +81,17 @@ print('Aha', faster_solution(parse_input(PUZZLE_INPUT_AHA)[1]))
 print('Jagger', faster_solution(parse_input(PUZZLE_INPUT_JAGGER)[1]))
 
 
+def check_co_primes(my_input: List[BusType]):
+    first_bus = None
+    for bus in my_input:
+        assert is_prime(bus.interval), bus.interval
+        if first_bus is not None:
+            assert is_co_prime(first_bus.interval, bus.interval), (first_bus.interval, bus.interval)
+        first_bus = bus
+
+
 def cheat_solution(my_input):
+    check_co_primes(my_input)
     interval = multiply(bus.interval for bus in my_input)
     result = 0
     for bus in my_input:
@@ -133,5 +130,5 @@ def aha_solution(my_input: List[BusType], start_t=0):
 
 
 assert aha_solution(parse_input(TEST_INPUT)[1]) == 1068781
-print('AHA Solution mit AHA', aha_solution(parse_input(PUZZLE_INPUT_AHA)[1], start_t=1010182346200000))
+#print('AHA Solution mit AHA', aha_solution(parse_input(PUZZLE_INPUT_AHA)[1], start_t=1010182346200000))
 # 1010182346291467
