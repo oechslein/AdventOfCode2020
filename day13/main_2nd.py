@@ -62,12 +62,12 @@ def faster_solution(my_input: list):
         # new interval is old_interval * interval from bus
         #  (that is the next time all conditions of previous busses and new bus are met)
         return calc_solution_rec(curr_timestamp=get_next_timestamp(curr_timestamp, next_bus, interval),
-                                 interval=np.lcm(interval, next_bus.interval),
+                                 interval=np.lcm(interval, next_bus.interval, dtype=np.uint64),
                                  remaining_input=remaining_input[1:])
 
     # sort input with highest interval first
     my_input.sort(key=lambda bus: bus.interval, reverse=True)
-    min_timestamp = calc_solution_rec(curr_timestamp=np.int64(1), interval=np.int64(1), remaining_input=my_input)
+    min_timestamp = calc_solution_rec(curr_timestamp=np.uint64(1), interval=np.uint64(1), remaining_input=my_input)
 
     assert all(fits_schedule(min_timestamp, bus) for bus in my_input)
     return min_timestamp
