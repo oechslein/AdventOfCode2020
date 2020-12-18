@@ -21,8 +21,8 @@ expr = pyparsing.infixNotation(
     ppc.integer,
     [
         ("^", 2, pyparsing.opAssoc.LEFT),
-        ("+-", 2, pyparsing.opAssoc.LEFT),
-        ("*/", 2, pyparsing.opAssoc.LEFT),
+        (pyparsing.oneOf("+ -"), 2, pyparsing.opAssoc.LEFT),
+        (pyparsing.oneOf("* /"), 2, pyparsing.opAssoc.LEFT),
     ],
 )
 
