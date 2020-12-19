@@ -51,65 +51,82 @@ def parse_input(my_input, replace=True):
     return rules_dict, test_lines.split('\n')
 
 
-def restrict_possibilities(current_possibilities, test_line):
-    return {(test_line_index, applied_rules) for test_line_index, applied_rules in current_possibilities
-            if test_line_index < len(test_line)}
+class GrammarChecker(object):
+    def __init__(self, rules_dict):
+        self.rules_dict = rules_dict
 
+    @staticmethod
+    def restrict_possibilities(current_possibilities, test_line):
+        return {(test_line_index, applied_rules)
+                for test_line_index, applied_rules in current_possibilities
+                if test_line_index < len(test_line)}
 
-def match_rule_alt(current_possibilities, test_line, curr_rule, rules_dict):
-    new_current_possibilities = set()
-    for elem in curr_rule:
-        new_current_possibilities.update(match_rule(current_possibilities, test_line, elem, rules_dict))
-    return new_current_possibilities
+    def match_rule_alt(self, current_possibilities, test_line, curr_rule):
+        new_current_possibilities = set()
+        for elem in curr_rule:
+            new_current_possibilities.update(self.match_rule(current_possibilities, test_line, elem))
+        return new_current_possibilities
 
-
-def match_rule_seq(current_possibilities, test_line, curr_rule, rules_dict):
-    for elem in curr_rule:
-        current_possibilities = match_rule(current_possibilities, test_line, elem, rules_dict)
-    return current_possibilities
-
-
-def match_rule(current_possibilities, test_line, curr_rule, rules_dict):
-    current_possibilities = restrict_possibilities(current_possibilities, test_line)
-    if not current_possibilities:
+    def match_rule_seq(self, current_possibilities, test_line, curr_rule):
+        for elem in curr_rule:
+            current_possibilities = self.match_rule(current_possibilities, test_line, elem)
         return current_possibilities
-    if isinstance(curr_rule, sequence_list):
-        return match_rule_seq(current_possibilities, test_line, curr_rule, rules_dict)
-    elif isinstance(curr_rule, alt_list):
-        return match_rule_alt(current_possibilities, test_line, curr_rule, rules_dict)
-    elif isinstance(curr_rule, int):
-        current_possibilities = {(test_line_index, applied_rules + (curr_rule,))
-                                 for test_line_index, applied_rules in current_possibilities}
-        return match_rule(current_possibilities, test_line, rules_dict[curr_rule], rules_dict)
-    else:
-        assert isinstance(curr_rule, str)
+
+    @staticmethod
+    def match_rule_str(current_possibilities, test_line, curr_rule):
         return {(test_line_index + 1, applied_rules)
                 for test_line_index, applied_rules in current_possibilities
                 if curr_rule == test_line[test_line_index]}
 
+    def match_rule(self, current_possibilities, test_line, curr_rule):
+        current_possibilities = self.restrict_possibilities(current_possibilities, test_line)
+        if not current_possibilities:
+            return current_possibilities
+        if isinstance(curr_rule, sequence_list):
+            return self.match_rule_seq(current_possibilities, test_line, curr_rule)
+        elif isinstance(curr_rule, alt_list):
+            return self.match_rule_alt(current_possibilities, test_line, curr_rule)
+        elif isinstance(curr_rule, int):
+            current_possibilities = {(test_line_index, applied_rules + (curr_rule,))
+                                     for test_line_index, applied_rules in current_possibilities}
+            return self.match_rule(current_possibilities, test_line, self.rules_dict[curr_rule])
+        else:
+            assert isinstance(curr_rule, str)
+            return self.match_rule_str(current_possibilities, test_line, curr_rule)
 
-def match_rule_first(index, test_line, rules_dict, with_print=False):
-    current_possibilities = match_rule({(0, (0,))}, test_line, rules_dict[0], rules_dict)
-    current_possibilities = {(test_line_index, applied_rules)
-                             for test_line_index, applied_rules in current_possibilities
-                             if test_line_index == len(test_line)}
-    if with_print:
-        print(f'{index} {test_line}: {current_possibilities}')
-    return len(current_possibilities) > 0
+    def match_rule_first(self, index, test_line, with_print=False):
+        possibilities = self.match_rule({(0, (0,))}, test_line, self.rules_dict[0])
+        solutions = {(test_line_index, applied_rules)
+                     for test_line_index, applied_rules in possibilities
+                     if test_line_index == len(test_line)}
+        if with_print:
+            print(f'{index} {test_line}: {solutions}')
+        return len(solutions) > 0
 
 
 def check(rules_dict, test_lines, with_print=False):
+    grammar_checker = GrammarChecker(rules_dict)
     return sum(1 for index, test_line in enumerate(test_lines)
-               if match_rule_first(index, test_line, rules_dict, with_print=with_print))
+               if grammar_checker.match_rule_first(index, test_line, with_print=with_print))
 
 
-assert check(*parse_input(TEST_INPUT, replace=False), with_print=True) == 2
-assert check(*parse_input(TEST_INPUT_2ND, replace=False), with_print=True) == 3
+def test_1st():
+    assert check(*parse_input(TEST_INPUT, replace=False), with_print=True) == 2
+    assert check(*parse_input(TEST_INPUT_2ND, replace=False), with_print=True) == 3
+
+
+def test_2nd():
+    rules_dict = parse_input(TEST_INPUT_2ND)[0]
+    grammar_checker = GrammarChecker(rules_dict)
+    assert not grammar_checker.match_rule_first(0, "a")
+    assert grammar_checker.match_rule_first(0, "bbabbbbaabaabba")
+    assert grammar_checker.match_rule_first(0, "babbbbaabbbbbabbbbbbaabaaabaaa")
+    assert not grammar_checker.match_rule_first(0, "aaaabbaaaabbaaa")
+    assert check(*parse_input(TEST_INPUT_2ND), with_print=True) == 12
+
+
+test_1st()
 print(check(*parse_input(PUZZLE_INPUT, replace=False), with_print=True))
 
-assert not match_rule_first(0, "a", parse_input(TEST_INPUT_2ND)[0])
-assert match_rule_first(0, "bbabbbbaabaabba", parse_input(TEST_INPUT_2ND)[0])
-assert match_rule_first(0, "babbbbaabbbbbabbbbbbaabaaabaaa", parse_input(TEST_INPUT_2ND)[0])
-assert not match_rule_first(0, "aaaabbaaaabbaaa", parse_input(TEST_INPUT_2ND)[0])
-assert check(*parse_input(TEST_INPUT_2ND), with_print=True) == 12
+test_2nd()
 print(check(*parse_input(PUZZLE_INPUT), with_print=True))
