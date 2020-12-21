@@ -30,7 +30,7 @@ def is_prime(n):
         return True
     if n % 3 == 0:
         return False
-    r = int(n**0.5)
+    r = int(n ** 0.5)
     # since all primes > 3 are of the form 6n ± 1
     # start with f=5 (which is prime)
     # and test f, f+2 for being prime
@@ -242,3 +242,53 @@ class Parser:
             ','.join(keywords),
             self.text[self.pos + 1],
         )
+
+
+def listify(fn=None, wrapper=list):
+    """
+    A decorator which wraps a function's return value in ``list(...)``.
+
+    Useful when an algorithm can be expressed more cleanly as a generator but
+    the function should return an list.
+
+    Example::
+
+        >>> @listify
+        ... def get_lengths(iterable):
+        ...     for i in iterable:
+        ...         yield len(i)
+        >>> get_lengths(["spam", "eggs"])
+        [4, 4]
+        >>>
+        >>> @listify(wrapper=tuple)
+        ... def get_lengths_tuple(iterable):
+        ...     for i in iterable:
+        ...         yield len(i)
+        >>> get_lengths_tuple(["foo", "bar"])
+        (3, 3)
+    """
+
+    def listify_return(fn):
+        @functools.wraps(fn)
+        def listify_helper(*args, **kw):
+            return wrapper(fn(*args, **kw))
+
+        return listify_helper
+
+    if fn is None:
+        return listify_return
+    return listify_return(fn)
+
+
+def transform_return_value(transformer):
+    def inner(f):
+        @functools.wraps(f)
+        def new_f(*argv, **kwargs):
+            return transformer(f(*argv, **kwargs))
+
+        return new_f
+
+    return inner
+
+
+dictionarify = listify(wrapper=dict)
