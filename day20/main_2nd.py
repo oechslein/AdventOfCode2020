@@ -190,11 +190,14 @@ class TileSolver(object):
         tot = 0
         for final_picture in TileSolver.create_all_possible_tiles(final_picture):
             image = '\n'.join(final_picture)
-            image_replaced = re.sub(r'^(.*..................)#(..*\n)'
-                                    r'^(.*)#(....)##(....)##(....)###(.*\n)'
-                                    r'^(.*.)#(..)#(..)#(..)#(..)#(..)#(....*\n)',
-                                    '\g<1>O\g<2>\g<3>O\g<4>OO\g<5>OO\g<6>OOO\g<7>\g<8>O\g<9>O\g<10>O\g<11>O\g<12>O\g<13>O\g<14>',
-                                    image, flags=re.MULTILINE)
+            seadragon_hashes = ['O', 'O', 'OO', 'OO', 'OOO', 'O', 'O', 'O', 'O', 'O', 'O']
+            image_replaced = re.sub(
+                r'^(.*..................)#(:?..*\n)'
+                r'^(.*)#(....)##(....)##(....)###(:?.*\n)'
+                r'^(.*.)#(..)#(..)#(..)#(..)#(..)#(:?....*\n)',
+                ''.join(f'g<{i+1}>{o_s}' for i, o_s in zip(range(len(seadragon_hashes)), seadragon_hashes)),
+                image, flags=re.MULTILINE)
+
             tot += image_replaced.count('O') // ''.join(self.get_dragon()).count('#')
         return tot
 
