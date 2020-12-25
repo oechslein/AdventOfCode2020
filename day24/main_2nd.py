@@ -102,10 +102,10 @@ def calc1st(directions_list: List[List[str]]):
     return count_blacks(get_all_tiles(directions_list))
 
 
-def calc2nd(directions_list: List[List[str]]):
+def calc2nd(directions_list: List[List[str]], rounds=100):
     all_tiles = get_all_tiles(directions_list)
-    for day in range(100):
-        # Add missing whites
+    for day in range(rounds):
+        # Add missing whites tiles (all neighbors of black tiles)
         for tile in list(all_tiles.values()):
             if tile.black:
                 for neighbor_x, neighbor_y in tile.gen_neighbors():
@@ -120,7 +120,7 @@ def calc2nd(directions_list: List[List[str]]):
             if tile.white and tile.black_neighbors_amount(all_tiles) == 0:
                 del all_tiles[(tile.x, tile.y)]
 
-    print(count_blacks(all_tiles))
+    #print(count_blacks(all_tiles))
     return count_blacks(all_tiles)
 
 
@@ -153,4 +153,9 @@ print(f'Duration: {time.time() - start_time}, {(time.time() - start_time) / 100}
 # Duration: 6.704365015029907, 0.06704365015029908 per round
 # no print: Duration: 6.323774576187134, 0.06323774576187134 per round
 
-print(calc2nd(parse_input(PUZZLE_INPUT)))
+print(0, calc2nd(parse_input(PUZZLE_INPUT), rounds=0))
+print(1, calc2nd(parse_input(PUZZLE_INPUT), rounds=1))
+print(2, calc2nd(parse_input(PUZZLE_INPUT), rounds=2))
+print(10, calc2nd(parse_input(PUZZLE_INPUT), rounds=10))
+print(100, calc2nd(parse_input(PUZZLE_INPUT), rounds=100))
+
