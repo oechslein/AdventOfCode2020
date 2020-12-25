@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from numbers import Number
 from typing import Dict, Tuple, List
 
+from frozendict import frozendict
 import numpy as np
 
 import Utils
@@ -19,388 +20,206 @@ import sys
 import re
 
 
-# at least two sides need to fit to others
-# only the corner tiles (always 4) have only two sides fitting
-# inner tiles (x-2)*(x-2) have all sides fitting
-# outer (not corner) ((x-2)*4) have 3 sides fitting
-# amount of tiles is x * y
-# image is always square => x * x
+class TileSolver(object):
+    def __init__(self, my_input):
+        self.used_tile_numbers = []
+        self.data = TileSolver.parse_input(my_input)
+        self.width = math.isqrt(len(self.data))
+        self.picture = [[[] for x in range(self.width)] for y in range(self.width)]
 
-class Tile(object):
-    def __init__(self, tile_number: int, tile_lines: np.ndarray):
-        self.tile_number = tile_number
-        self.tile_lines = tile_lines
-        self.tile_lines.flags.writeable = False
-        self.__hash = hash((tile_number, self.as_tuple()))
+    @staticmethod
+    def turn(lines, turns):
+        for x in range(turns):
+            turn = []
+            for y in range(len(lines)):
+                turn.append(''.join([z[y] for z in reversed(lines)]))
+            lines = [y for y in turn]
+        return lines
 
-    def __hash__(self):
-        return self.__hash
+    @staticmethod
+    def flip(lines):
+        return [x[::-1] for x in lines]
 
-    def __eq__(self, other):
-        if not isinstance(other, Tile):
-            return False
-        return (self.tile_number == other.tile_number) and (self.tile_lines == other.tile_lines).all()
+    @staticmethod
+    def parse_input(my_input):
+        return frozendict({int(tile_data.split(':\n')[0].split(' ')[1]): tuple(tile_data.split(':\n')[1].split('\n'))
+                           for tile_data in my_input.strip('\n').split('\n\n')})
 
-    @classmethod
-    def parse_tile(cls, tile_str):
-        tile_lines = tile_str.split('\n')
-        tile_number = int(re.search(r'\d+', tile_lines[0]).group(0))
-        tile_lines = tile_lines[1:]
-        return Tile(tile_number, np.array([list(tile) for tile in tile_lines]))
-
-    def __repr__(self):
-        return str(self.tile_number) + "/" + self.as_tuple().__repr__()
-
-    def as_tuple(self):
-        return tuple(''.join(tile_line) for tile_line in self.tile_lines)
-
-    @property
-    def shape(self):
-        return self.tile_lines.shape
-
-    @property
-    def width(self):
-        return self.shape[0]
-
-    @property
-    def height(self):
-        return self.shape[1]
-
-    def rotate(self, amount):
-        return Tile(self.tile_number, np.rot90(self.tile_lines, k=-amount, axes=(1, 0)))
-
-    def flip_x(self):
-        return Tile(self.tile_number, np.fliplr(self.tile_lines))
-
-    def flip_y(self):
-        return Tile(self.tile_number, np.flipud(self.tile_lines))
-
-    def _tile_line_to_number(self, tile_line):
-        return int(''.join(tile_line).replace('.', '0').replace('#', '1'), base=2)
+    @staticmethod
+    def create_all_possible_tiles(tile):
+        return (tile, TileSolver.turn(tile, 1), TileSolver.turn(tile, 2),
+                TileSolver.turn(tile, 3), TileSolver.flip(tile),
+                TileSolver.turn(TileSolver.flip(tile), 1),
+                TileSolver.turn(TileSolver.flip(tile), 2),
+                TileSolver.turn(TileSolver.flip(tile), 3))
 
     @functools.lru_cache(999)
-    def get_border(self, border: int):
-        if border == 0:
-            return self._tile_line_to_number(self.tile_lines[0])
-        elif border == 1:
-            return self._tile_line_to_number(np.rot90(self.tile_lines, k=-1, axes=(1, 0))[0])
-        elif border == 2:
-            return self._tile_line_to_number(self.tile_lines[self.width - 1])
-        elif border == 3:
-            return self._tile_line_to_number(np.rot90(self.tile_lines, k=-1, axes=(1, 0))[self.height - 1])
+    def get_all_tiles_dict(self):
+        return frozendict({tile_number: self.create_all_possible_tiles(tile)
+                           for tile_number, tile in self.data.items()})
 
     @functools.lru_cache(999)
-    def get_all_borders(self):
-        return frozenset(self.get_border(border) for border in range(4))
+    def get_all_borders_dict(self):
+        return frozendict({tile_number: tuple(self.get_south_border(tile) for tile in tiles)
+                           for tile_number, tiles in self.get_all_tiles_dict().items()})
 
     @functools.lru_cache(999)
-    def get_all_possible_tiles(self, only_flipped=False):
-        all_possible_tiles = {self}
-        if not only_flipped:
-            for i in range(1, 4):
-                all_possible_tiles.add(self.rotate(i))
-        for curr_tile in list(all_possible_tiles):
-            all_possible_tiles.add(curr_tile.flip_x())
-            all_possible_tiles.add(curr_tile.flip_y())
-        return all_possible_tiles
+    def get_border_total_amount_dict(self):
+        return {tile_number: sum(1 for border in tile_borders
+                                 if any(border in other_tile_borders
+                                        for other_tile_number, other_tile_borders in self.get_all_borders_dict().items()
+                                        if tile_number != other_tile_number))
+                for tile_number, tile_borders in self.get_all_borders_dict().items()}
 
-    def remove_borders(self):
-        new_tile_lines = np.ndarray((self.width - 2, self.height - 2), self.tile_lines.dtype)
-        for x in range(1, self.width - 1):
-            for y in range(1, self.height - 1):
-                new_tile_lines[x - 1, y - 1] = self.tile_lines[x, y]
-        return Tile(self.tile_number, new_tile_lines)
+    def calc_1st(self):
+        border_total_amount_dict = self.get_border_total_amount_dict()
+        return Utils.multiply(tile_number
+                              for tile_number, border_total_amount in border_total_amount_dict.items()
+                              if border_total_amount == min(border_total_amount_dict.values()))
 
+    def get_left_upper_corner_tile(self):
+        min_border_amount = min(self.get_border_total_amount_dict().values())
+        min_tile_numbers = {tile_number: tiles
+                            for tile_number, tiles in self.get_all_tiles_dict().items()
+                            if self.get_border_total_amount_dict()[tile_number] == min_border_amount}
+        for tile_number, tiles in min_tile_numbers.items():
+            other_tile_borders_set = {
+                other_tile_borders
+                for other_tile_number, other_tile_borders in self.get_all_borders_dict().items()
+                if tile_number != other_tile_number}
+            all_other_tile_borders = functools.reduce(set.union, other_tile_borders_set, set())
 
-class TilesSolver(object):
-    def __init__(self, tiles):
-        self.tiles = tiles
-        self.shape = (math.isqrt(len(self.tiles)),) * 2
-        self.tile_possibilities = self.create_tile_possibilities_array()
+            for tile in tiles:
+                # check if right east and north borders exist
+                if self.get_east_border(tile) in all_other_tile_borders \
+                        and self.get_north_border(tile) in all_other_tile_borders:
+                    return tile_number, tile
+        assert False
 
-    def create_tile_possibilities_array(self):
-        possibilities = np.ndarray((self.width, self.height), set)
-        corner_tiles = self.get_corner_tiles()
-        first_corner_tile_number = list(self.get_corner_tile_numbers())[0] \
-            if 1951 not in self.get_corner_tile_numbers() \
-            else 1951
+    @staticmethod
+    def get_north_border(tile):
+        return tile[-1]
 
-        for x in range(self.width):
-            for y in range(self.height):
-                if (x, y) == (0, 0):
-                    possibilities[x, y] = {corner_tile for corner_tile in corner_tiles
-                                           if corner_tile.tile_number == first_corner_tile_number}
-                elif (x, y) in ((self.width - 1, 0), (0, self.height - 1), (self.width - 1, self.height - 1)):
-                    possibilities[x, y] = {corner_tile for corner_tile in corner_tiles
-                                           if corner_tile.tile_number != first_corner_tile_number}
-                else:
-                    possibilities[x, y] = {tile for tile in self.get_all_tiles()
-                                           if tile.tile_number not in self.get_corner_tile_numbers()}
-        return possibilities
+    @staticmethod
+    def get_south_border(tile):
+        return tile[0]
 
-    @property
-    def width(self):
-        return self.shape[0]
+    @staticmethod
+    def get_west_border(tile):
+        return ''.join(subtile[0] for subtile in tile)
 
-    @property
-    def height(self):
-        return self.shape[1]
+    @staticmethod
+    def get_east_border(tile):
+        return ''.join(subtile[-1] for subtile in tile)
 
-    @functools.lru_cache(999)
-    @Utils.listify
-    def get_neighbors(self, x, y):
-        if y > 0:
-            yield x, y - 1, 0
-        if x < self.width - 1:
-            yield x + 1, y, 1
-        if y < self.height - 1:
-            yield x, y + 1, 2
-        if x > 0:
-            yield x - 1, y, 3
+    def set_left_upper_corner_tile(self):
+        tile_number, tile = self.get_left_upper_corner_tile()
+        self.picture[0][0] = tile
+        self.used_tile_numbers = [tile_number]
 
-    def get_tile_possibilities(self, x, y):
-        return self.tile_possibilities[x, y]
+    def gen_all_flatten_tiles(self):
+        for tile_number, tiles in self.get_all_tiles_dict().items():
+            if tile_number not in self.used_tile_numbers:
+                for tile in tiles:
+                    yield tile_number, tile
 
-    def get_tile_possibilities_lens(self):
-        lens_array = np.ndarray(self.shape, int)
-        for x in range(self.width):
-            for y in range(self.height):
-                lens_array[x, y] = len(self.tile_possibilities[x, y])
-        return lens_array
+    def set_first_row(self):
+        y = 0
+        # start with 1 since 0 already set!
+        for x in range(1, self.width):
+            for tile_number, tile in self.gen_all_flatten_tiles():
+                if self.get_west_border(tile) == self.get_east_border(self.picture[y][x - 1]):
+                    self.picture[y][x] = tile
+                    self.used_tile_numbers.append(tile_number)
+                    break
 
-    def get_tile_possibilities_count(self):
-        tile_possibilities_count = 1
-        for x in range(self.width):
-            for y in range(self.height):
-                tile_possibilities_count *= len(self.tile_possibilities[x, y])
-        return tile_possibilities_count
+    def set_remaining_rows(self):
+        for y in range(1, self.width):
+            for x in range(self.width):
+                for tile_number, tile in self.gen_all_flatten_tiles():
+                    if self.get_south_border(tile) == self.get_north_border(self.picture[y - 1][x]):
+                        if x != 0:
+                            assert self.get_west_border(tile) == self.get_east_border(self.picture[y][x - 1])
+                        self.picture[y][x] = tile
+                        self.used_tile_numbers.append(tile_number)
+                        break
 
-    @functools.lru_cache(999)
-    def border_fits(self, tile, neighbor_tile, direction):
-        neighbor_direction = (direction + 2) % 4
-        return tile.get_border(direction) == neighbor_tile.get_border(neighbor_direction)
+    def solve(self):
+        self.set_left_upper_corner_tile()
+        self.set_first_row()
+        self.set_remaining_rows()
 
-    def remove_used_tile_number(self, x, y):
-        used_tile_number = list(self.tile_possibilities[x, y])[0].tile_number
-        for y2 in range(self.height):
-            for x2 in range(self.width):
-                if (x, y) != (x2, y2):
-                    self.tile_possibilities[x2, y2] = {tile for tile in self.tile_possibilities[x2, y2]
-                                                       if tile.tile_number != used_tile_number}
+    def get_final_picture(self):
+        final = []
+        for y in range(self.width):
+            for x in range(len(self.picture[y][0])):
+                final.append(''.join([row[x] for row in self.picture[y]]))
+        return final
 
-    def remove_wrong_possibilities(self):
-        removed_possibilities = True
-        while removed_possibilities:
-            removed_possibilities = False
-            prev_x = prev_y = None
-            for y in range(self.height):
-                for x in reversed(range(self.width)) if y % 2 else range(self.width):
-                    for tile in list(self.tile_possibilities[x, y]):
-                        prev_directions = [direction for n_x, n_y, direction in self.get_neighbors(x, y)
-                                           if (n_x, n_y) == (prev_x, prev_y)]
-                        fits = True
-                        if prev_directions:
-                            assert len(prev_directions) == 1
-                            prev_direction = prev_directions[0]
-                            fits = any(self.border_fits(tile, neighbor_tile, prev_direction)
-                                       for neighbor_tile in self.get_tile_possibilities(prev_x, prev_y))
-
-                        if fits and not removed_possibilities:
-                            fits = all(any(self.border_fits(tile, neighbor_tile, direction)
-                                           for neighbor_tile in self.get_tile_possibilities(neighbor_x, neighbor_y))
-                                       for neighbor_x, neighbor_y, direction in self.get_neighbors(x, y))
-                        if not fits:
-                            self.tile_possibilities[x, y].remove(tile)
-                            removed_possibilities = True
-                            assert len(self.tile_possibilities[x, y]) >= 1
-                    prev_x, prev_y = x, y
-                    if len({tile.tile_number for tile in self.tile_possibilities[x, y]}) == 1:
-                        if len(self.tile_possibilities[x, y]) == 2 and (x, y) == (0, 0):
-                            self.tile_possibilities[x, y] = {list(self.tile_possibilities[x, y])[1]}
-                        self.remove_used_tile_number(x, y)
-        if all(len(self.tile_possibilities[x, y]) == 2 for x in range(self.width) for y in range(self.height)):
-            self.tile_possibilities[0, 0] = {list(self.tile_possibilities[0, 0])[1]}
-            self.remove_wrong_possibilities()
-        assert all(len(self.tile_possibilities[x, y]) == 1 for x in range(self.width) for y in range(self.height))
-
-    def get_tile_array(self):
-        tile_array = np.ndarray((self.width, self.height), Tile)
-        for x in range(self.width):
-            for y in range(self.height):
-                tile_array[x, y] = list(self.get_tile_possibilities(x, y))[0]
-        return tile_array
-
-    def remove_borders(self, tile_array):
-        for x in range(self.width):
-            for y in range(self.height):
-                tile_array[x, y] = tile_array[x, y].remove_borders()
-        return tile_array
-
-    def get_image(self, tile_array):
-        image = []
-        for y in range(tile_array.shape[1]):
-            for line in range(8):
-                for x in range(tile_array.shape[0]):
-                    image.append(''.join(tile_array[x, y].tile_lines[line]))
-                image.append('\n')
-        return ''.join(image[:-1])
-
-    def get_matching_sides(self, possible_tile_to_check, all_tiles):
-        matching_sides = 0
-        for tile in all_tiles:
-            if tile.tile_number != possible_tile_to_check.tile_number:
-                tile_all_borders = tile.get_all_borders()
-                matching_sides += sum(1 for border in possible_tile_to_check.get_all_borders()
-                                      if border in tile_all_borders)
-        return matching_sides
+    def cut_other_borders(self):
+        for y in range(self.width):
+            for x in range(self.width):
+                self.picture[y][x] = [tile_row[1:-1] for tile_row in self.picture[y][x][1:-1]]
 
     @functools.lru_cache(999)
-    @Utils.listify(wrapper=tuple)
-    def get_all_borders(self):
-        for tile in self.get_all_tiles(only_flipped=True):
-            yield from tile.get_all_borders()
+    def get_dragon(self):
+        return ['                  # ',
+                '#    ##    ##    ###',
+                ' #  #  #  #  #  #   ']
 
-    def get_borders_count(self):
-        borders_count = collections.Counter()
-        for border in self.get_all_borders():
-            borders_count[border] += 1
-        return borders_count
+    def get_sea_dragon_indexes(self, dragon):
+        idx = []
+        for y in range(len(dragon)):
+            for x in range(len(dragon[0])):
+                if dragon[y][x] == '#':
+                    idx.append([x, y])
+        return idx
 
-    @functools.lru_cache(999)
-    @Utils.listify(wrapper=frozenset)
-    def get_unique_borders(self):
-        for border, border_count in self.get_borders_count().items():
-            if border_count == 1:
-                yield border
+    def get_sea_dragon_count_old(self, final_picture):
+        dragon = self.get_dragon()
+        idx = self.get_sea_dragon_indexes(dragon)
+        sea_dragon_count = 0
+        for final_picture in TileSolver.create_all_possible_tiles(final_picture):
+            for y in range(len(final_picture) - len(dragon)):
+                for x in range(len(final_picture[y]) - len(dragon[0])):
+                    if all([final_picture[y + j][x + i] == '#' for i, j in idx]):
+                        sea_dragon_count += 1
+        return sea_dragon_count
 
-    @functools.lru_cache(999)
-    @Utils.listify(wrapper=tuple)
-    def get_corner_tiles(self):
-        for tile, borders_counts in self.get_tiles_with_border_count():
-            if sum(borders_count == 0 for borders_count in borders_counts) == 2:
-                yield tile
+    def get_sea_dragon_count(self, final_picture):
+        tot = 0
+        for final_picture in TileSolver.create_all_possible_tiles(final_picture):
+            image = '\n'.join(final_picture)
+            image_replaced = re.sub(r'^(.*..................)#(..*\n)'
+                                    r'^(.*)#(....)##(....)##(....)###(.*\n)'
+                                    r'^(.*.)#(..)#(..)#(..)#(..)#(..)#(....*\n)',
+                                    '\g<1>O\g<2>\g<3>O\g<4>OO\g<5>OO\g<6>OOO\g<7>\g<8>O\g<9>O\g<10>O\g<11>O\g<12>O\g<13>O\g<14>',
+                                    image, flags=re.MULTILINE)
+            tot += image_replaced.count('O') // ''.join(self.get_dragon()).count('#')
+        return tot
 
-    @Utils.listify(wrapper=tuple)
-    def get_border_count(self, tile: Tile):
-        borders_count = collections.Counter()
-        for curr_tile in self.get_all_tiles(only_flipped=True):
-            if curr_tile.tile_number != tile.tile_number:
-                for border in curr_tile.get_all_borders():
-                    borders_count[border] += 1
-        for border in tile.get_all_borders():
-            yield borders_count[border]
-
-    @Utils.listify(wrapper=tuple)
-    def get_tiles_with_border_count(self):
-        for tile in self.get_all_tiles():
-            yield tile, self.get_border_count(tile)
-
-    @functools.lru_cache(999)
-    def get_corner_tile_numbers(self):
-        return frozenset(tile.tile_number for tile in self.get_corner_tiles())
-
-    @functools.lru_cache(999)
-    def get_all_tiles(self, only_flipped=False):
-        return frozenset(possible_tiles for tile in self.tiles
-                         for possible_tiles in tile.get_all_possible_tiles(only_flipped=only_flipped))
-
-    def get_result_1st(self):
-        return multiply(self.get_corner_tile_numbers())
+    def calc_2nd(self):
+        self.solve()
+        self.cut_other_borders()
+        final_picture = self.get_final_picture()
+        sea_dragon_count = self.get_sea_dragon_count(final_picture)
+        sea_dragon_count_old = self.get_sea_dragon_count_old(final_picture)
+        assert sea_dragon_count == sea_dragon_count_old
+        return ''.join(final_picture).count('#') - sea_dragon_count * ''.join(self.get_dragon()).count('#')
 
 
-def parse_input(my_input):
-    return [Tile.parse_tile(tile_str) for tile_str in my_input.strip().split('\n\n')]
+tile_solver = TileSolver(TEST_INPUT)
+assert tile_solver.calc_1st() == (1951 * 3079 * 2971 * 1171)
+assert tile_solver.calc_2nd() == 273
 
+############################################################################################################
 
-test_input_solver = TilesSolver(parse_input(TEST_INPUT))
-assert test_input_solver.get_result_1st() == (1951 * 3079 * 2971 * 1171), \
-    test_input_solver.get_result_1st()
+tile_solver = TileSolver(PUZZLE_INPUT)
+part_1 = tile_solver.calc_1st()
+print('Part 1: {}'.format(part_1))
 
-test_input_solver.remove_wrong_possibilities()
+part_2 = tile_solver.calc_2nd()
+print('Part 2: {}'.format(part_2))
 
-image = test_input_solver.get_image(test_input_solver.remove_borders(test_input_solver.get_tile_array()))
-print(image, '\n')
-
-assert image.strip() == """
-.####...#####..#...###..
-#####..#..#.#.####..#.#.
-.#.#...#.###...#.##.##..
-#.#.##.###.#.##.##.#####
-..##.###.####..#.####.##
-...#.#..##.##...#..#..##
-#.##.#..#.#..#..##.#.#..
-.###.##.....#...###.#...
-#.####.#.#....##.#..#.#.
-##...#..#....#..#...####
-..#.##...###..#.#####..#
-....#.##.#.#####....#...
-..##.##.###.....#.##..#.
-#...#...###..####....##.
-.#.##...#.##.#.#.###...#
-#.###.#..####...##..#...
-#.###...#.##...#.######.
-.###.###.#######..#####.
-..##.#..#..#.#######.###
-#.#..##.########..#..##.
-#.#####..#.#...##..#....
-#....##..#.#########..##
-#...#.....#..##...###.##
-#..###....##.#...##.##.#
-""".strip()
-
-if False:
-    image = '\n'.join(
-        ''.join(line) for line in np.rot90(np.array([list(line) for line in image.strip().split('\n')]), k=-1))
-    print(image, '\n')
-
-    image = '\n'.join(''.join(line) for line in np.fliplr(np.array([list(line) for line in image.strip().split('\n')])))
-    print(image, '\n')
-
-image_replaced = re.sub(r'^(.*..................)#(..*\n)'
-                        r'^(.*)#(....)##(....)##(....)###(.*\n)'
-                        r'^(.*.)#(..)#(..)#(..)#(..)#(..)#(....*\n)',
-                        '\g<1>O\g<2>\g<3>O\g<4>OO\g<5>OO\g<6>OOO\g<7>\g<8>O\g<9>O\g<10>O\g<11>O\g<12>O\g<13>O\g<14>',
-                        image, flags=re.MULTILINE)
-
-assert image_replaced.count('#') == 273
-
-tiles_solver = TilesSolver(parse_input(PUZZLE_INPUT))
-print(tiles_solver.get_result_1st())
-# 64802175715999
-
-tiles_solver.remove_wrong_possibilities()
-image = tiles_solver.get_image(tiles_solver.remove_borders(tiles_solver.get_tile_array()))
-image_replaced = re.sub(r'^(.*..................)#(..*\n)'
-                        r'^(.*)#(....)##(....)##(....)###(.*\n)'
-                        r'^(.*.)#(..)#(..)#(..)#(..)#(..)#(....*\n)',
-                        '\g<1>O\g<2>\g<3>O\g<4>OO\g<5>OO\g<6>OOO\g<7>\g<8>O\g<9>O\g<10>O\g<11>O\g<12>O\g<13>O\g<14>',
-                        image, flags=re.MULTILINE)
-
-print(image_replaced.count('#'))
-
-"""
-.####...#####..#...###..
-#####..#..#.#.####..#.#.
-.#.#...#.###...#.##.##..
-#.#.##.###.#.##.##.#####
-..##.###.####..#.####.##
-...#.#..##.##...#..#..##
-#.##.#..#.#..#..##.#.#..
-.###.##.....#...###.#...
-#.####.#.#....##.#..#.#.
-##...#..#....#..#...####
-..#.##...###..#.#####..#
-....#.##.#.#####....#...
-..##.##.###.....#.##..#.
-#...#...###..####....##.
-.#.##...#.##.#.#.###...#
-#.###.#..####...##..#...
-#.###...#.##...#.######.
-.###.###.#######..#####.
-..##.#..#..#.#######.###
-#.#..##.########..#..##.
-#.#####..#.#...##..#....
-#....##..#.#########..##
-#...#.....#..##...###.##
-#..###....##.#...##.##.#
-"""
+assert part_1 == 64802175715999
+assert part_2 == 2146
