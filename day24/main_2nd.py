@@ -1,23 +1,8 @@
-import abc
-import cProfile
-import collections
-import functools
-import itertools
-import operator
 import time
 from dataclasses import dataclass
-from numbers import Number
-from typing import Dict, Tuple, List, Optional, ClassVar
+from typing import Dict, Tuple, List, ClassVar
 
-import numpy as np
-
-import Utils
-from Utils import multiply, count
 from input import PUZZLE_INPUT
-
-import sys
-
-import re
 
 
 @dataclass
@@ -29,7 +14,7 @@ class Tile(object):
                                                           'w': (-2, 0), 'nw': (-1, +1), 'ne': (+1, +1)}
 
     def __hash__(self):
-        return self.x*13*7*11+self.y
+        return self.x * 13 * 7 * 11 + self.y
 
     def __eq__(self, other):
         if not isinstance(other, Tile):
@@ -120,7 +105,7 @@ def calc2nd(directions_list: List[List[str]], rounds=100):
             if tile.white and tile.black_neighbors_amount(all_tiles) == 0:
                 del all_tiles[(tile.x, tile.y)]
 
-    #print(count_blacks(all_tiles))
+    # print(count_blacks(all_tiles))
     return count_blacks(all_tiles)
 
 
@@ -158,4 +143,3 @@ print(1, calc2nd(parse_input(PUZZLE_INPUT), rounds=1))
 print(2, calc2nd(parse_input(PUZZLE_INPUT), rounds=2))
 print(10, calc2nd(parse_input(PUZZLE_INPUT), rounds=10))
 print(100, calc2nd(parse_input(PUZZLE_INPUT), rounds=100))
-

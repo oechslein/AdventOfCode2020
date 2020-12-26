@@ -1,21 +1,19 @@
-import collections
-import time
+import re
 
 import numpy as np
 
-import re
-from Utils import multiply
 from input import TEST_INPUT, PUZZLE_INPUT
 
 
 def parse_input(my_input):
     return list((result := re.fullmatch(r'([A-Z])(\d+)', instruction))
-                 and (result[1], int(result[2]))
-                 for instruction in my_input.strip().split('\n'))
+                and (result[1], int(result[2]))
+                for instruction in my_input.strip().split('\n'))
 
 
 def manhatten_distance(start, end):
     return abs((end - start)).sum()
+
 
 def get_position_after_direct_instruction(position, instruction, instruction_argument):
     if instruction == 'N':
@@ -41,9 +39,9 @@ def get_position_after_instructions(position, direction, instructions: list):
     elif next_instruction == 'F':
         position = get_position_after_direct_instruction(position, direction, next_instruction_argument)
     elif next_instruction == 'L':
-        direction = directions[(directions.find(direction)-next_instruction_argument//90) % len(directions)]
+        direction = directions[(directions.find(direction) - next_instruction_argument // 90) % len(directions)]
     elif next_instruction == 'R':
-        direction = directions[(directions.find(direction)+next_instruction_argument//90) % len(directions)]
+        direction = directions[(directions.find(direction) + next_instruction_argument // 90) % len(directions)]
     else:
         assert False, (next_instruction, next_instruction_argument)
     return get_position_after_instructions(position, direction, instructions[1:])
@@ -55,7 +53,8 @@ def manhatten_distance_after_instructions(instructions):
     end_position = get_position_after_instructions(start_position.copy(), start_direction, instructions)
     return manhatten_distance(start_position, end_position)
 
-assert manhatten_distance(np.array((0,0)), np.array((17, 8))) == 25
+
+assert manhatten_distance(np.array((0, 0)), np.array((17, 8))) == 25
 assert manhatten_distance_after_instructions(parse_input(TEST_INPUT)) == 25, \
     manhatten_distance_after_instructions(parse_input(TEST_INPUT))
 

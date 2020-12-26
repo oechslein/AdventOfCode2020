@@ -1,14 +1,10 @@
 import collections
-import time
+import re
 from typing import Union, List, Optional
 
-import numpy as np
-
-import re
-from Utils import multiply
-from input import TEST_INPUT, PUZZLE_INPUT, TEST_INPUT_2
-
 import bitstring
+
+from input import PUZZLE_INPUT, TEST_INPUT_2
 
 MaskInputType = collections.namedtuple('MaskInputType', ['mask_0', 'mask_1', 'mask_X'])
 MemInputType = collections.namedtuple('MemInputType', ['mem_addr', 'mem_value'])

@@ -1,8 +1,7 @@
 import numpy as np
 
-from input import TEST_INPUT, PUZZLE_INPUT
-
 from Utils import count
+from input import TEST_INPUT, PUZZLE_INPUT
 
 
 def parse_input(my_input):

@@ -1,21 +1,10 @@
 import cProfile
-import collections
-import functools
-import itertools
-import operator
 import time
 from dataclasses import dataclass
-from numbers import Number
-from typing import Dict, Tuple, List, Optional
+from typing import Dict
 
-import numpy as np
-
-from Utils import multiply, count
 from input import PUZZLE_INPUT
 
-import sys
-
-import re
 
 @dataclass(init=False)
 class CupCircle(object):
@@ -24,7 +13,7 @@ class CupCircle(object):
 
     def __init__(self, cup_string: str):
         input_circle = list(map(int, cup_string))
-        self.cups = {input_circle[i]: input_circle[i+1] for i in range(len(input_circle)-1)}
+        self.cups = {input_circle[i]: input_circle[i + 1] for i in range(len(input_circle) - 1)}
         self.cups[input_circle[-1]] = input_circle[0]
         self.current_cup = input_circle[0]
         self.highest_cup = max(self.cups)

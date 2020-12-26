@@ -1,19 +1,8 @@
-import collections
-import functools
-import itertools
-import operator
-from dataclasses import dataclass, field
-from numbers import Number
-from typing import Dict, Tuple, List, Optional, Set
-
-import numpy as np
-
-from Utils import multiply, count
-from input import PUZZLE_INPUT
-
-import sys
-
 import re
+from dataclasses import dataclass, field
+from typing import Tuple, List, Set
+
+from input import PUZZLE_INPUT
 
 TEST_INPUT = """
 Player 1:
@@ -124,8 +113,8 @@ def play_rounds(player1: Player, player2: Player, game: int = 1, with_output=Fal
         if with_output:
             print(f'-- Player {top_player.number} wins round {round} of game {game}! --')
         round += 1
-        #player1.reset_all_previous_decks()
-        #player2.reset_all_previous_decks()
+        # player1.reset_all_previous_decks()
+        # player2.reset_all_previous_decks()
     assert top_player
 
     if game == 1:

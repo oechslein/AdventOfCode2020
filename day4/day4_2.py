@@ -1223,7 +1223,9 @@ import re
 
 def convert_input(my_input):
     def convert_password_data(password_data):
-        return dict(tuple(key_value.split(':')) for key_value in password_data.replace('\n', ' ').split(' ') if key_value)
+        return dict(tuple(key_value.split(':'))
+                    for key_value in password_data.replace('\n', ' ').split(' ')
+                    if key_value)
 
     return [convert_password_data(password_data) for password_data in my_input.strip().split('\n\n')]
 

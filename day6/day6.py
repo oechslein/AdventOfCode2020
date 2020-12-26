@@ -1,5 +1,4 @@
 from functools import reduce
-from itertools import count
 
 from day6_input import puzzle_input
 
@@ -27,10 +26,9 @@ a
 b
 """
 
+
 def gen_group_input(my_input):
     return my_input.strip().split('\n\n')
-
-
 
 
 def get_count(group_input):

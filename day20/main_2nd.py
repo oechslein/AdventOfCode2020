@@ -1,23 +1,11 @@
-import collections
 import functools
-import heapq
-import itertools
 import math
-import operator
-from dataclasses import dataclass
-from numbers import Number
-from typing import Dict, Tuple, List
+import re
 
 from frozendict import frozendict
-import numpy as np
 
 import Utils
-from Utils import multiply, count
 from input import PUZZLE_INPUT, TEST_INPUT
-
-import sys
-
-import re
 
 
 class TileSolver(object):
@@ -195,7 +183,7 @@ class TileSolver(object):
                 r'^(.*..................)#(:?..*\n)'
                 r'^(.*)#(....)##(....)##(....)###(:?.*\n)'
                 r'^(.*.)#(..)#(..)#(..)#(..)#(..)#(:?....*\n)',
-                ''.join(f'g<{i+1}>{o_s}' for i, o_s in zip(range(len(seadragon_hashes)), seadragon_hashes)),
+                ''.join(f'g<{i + 1}>{o_s}' for i, o_s in zip(range(len(seadragon_hashes)), seadragon_hashes)),
                 image, flags=re.MULTILINE)
 
             tot += image_replaced.count('O') // ''.join(self.get_dragon()).count('#')

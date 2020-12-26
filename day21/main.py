@@ -1,19 +1,8 @@
-import collections
-import functools
-import itertools
-import operator
-from dataclasses import dataclass
-from numbers import Number
-from typing import Dict, Tuple, List
-
-import numpy as np
-
-from Utils import multiply, count
-from input import PUZZLE_INPUT, TEST_INPUT
-
-import sys
-
 import re
+from dataclasses import dataclass
+from typing import Tuple
+
+from input import PUZZLE_INPUT, TEST_INPUT
 
 
 class Ingredient(str):

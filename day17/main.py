@@ -1,8 +1,5 @@
-import collections
 from dataclasses import dataclass
 from typing import Dict, Tuple
-
-import numpy as np
 
 from input import TEST_INPUT, PUZZLE_INPUT
 
@@ -13,6 +10,7 @@ def min_max(my_list):
         curr_min = min(curr_min, elem)
         curr_max = max(curr_max, elem)
     return curr_min, curr_max
+
 
 @dataclass
 class PocketDim(object):
@@ -45,11 +43,11 @@ class PocketDim(object):
         min_z, max_z = min_max(PocketDim.z(cell) for cell in seed_dict)
 
         result = ['----------------------------------------------------------------------------------']
-        for z in range(min_z, max_z+1):
+        for z in range(min_z, max_z + 1):
             result.append(f'z={z}')
             for y in range(min_y, max_y + 1):
                 x_result = ""
-                for x in range(min_x, max_x+1):
+                for x in range(min_x, max_x + 1):
                     x_result += '#' if seed_dict.get(PocketDim.create_cell(x, y, z), False) else '.'
                 result.append(x_result)
             result.append('')
@@ -62,10 +60,12 @@ class PocketDim(object):
 
     def neighbors(self, cell, direct_only=True):
         distance = 1 if direct_only else 2
-        for diff_x in range(-distance, distance+1):
+        for diff_x in range(-distance, distance + 1):
             for diff_y in range(-distance, distance + 1):
                 for diff_z in range(-distance, distance + 1):
-                    neighbor_cell = PocketDim.create_cell(PocketDim.x(cell) + diff_x, PocketDim.y(cell) + diff_y, PocketDim.z(cell) + diff_z)
+                    neighbor_cell = PocketDim.create_cell(PocketDim.x(cell) + diff_x,
+                                                          PocketDim.y(cell) + diff_y,
+                                                          PocketDim.z(cell) + diff_z)
                     if cell != neighbor_cell:
                         yield neighbor_cell, self.seed_dict.get(neighbor_cell, False)
 

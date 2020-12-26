@@ -19,5 +19,3 @@ TEST_INPUT_2ND = [
 PUZZLE_INPUT_2ND = [
     (30000000, "7,12,1,0,16,2", None),
 ]
-
-

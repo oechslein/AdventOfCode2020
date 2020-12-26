@@ -1,21 +1,15 @@
-import collections
 import operator
-from dataclasses import dataclass
+import sys
 from numbers import Number
-from typing import Dict, Tuple
 
-import numpy as np
+import pyparsing
 
 from input import PUZZLE_INPUT, TEST_INPUT
-
-import sys
-import pyparsing
 
 ppc = pyparsing.pyparsing_common
 
 pyparsing.ParserElement.enablePackrat()
 sys.setrecursionlimit(3000)
-
 
 expr = pyparsing.infixNotation(
     ppc.integer,
@@ -33,6 +27,7 @@ opn = {
     "/": operator.truediv,
     "^": operator.pow,
 }
+
 
 def parse_input(my_input):
     return [expr.parseString(line)[0] for line in my_input.strip().split('\n')]

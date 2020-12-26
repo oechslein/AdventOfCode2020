@@ -1,20 +1,8 @@
-import collections
-import functools
-import itertools
-import operator
-from dataclasses import dataclass
-from numbers import Number
-from typing import Dict, Tuple, List, Optional
-
-import numpy as np
-
-from Utils import multiply, count
-from input import PUZZLE_INPUT
-
-import sys
-
 import re
+from dataclasses import dataclass
+from typing import List, Optional
 
+from input import PUZZLE_INPUT
 
 TEST_INPUT = """
 Player 1:
@@ -31,6 +19,7 @@ Player 2:
 7
 10
 """
+
 
 @dataclass
 class Player(object):
@@ -51,7 +40,7 @@ class Player(object):
         self.deck += cards
 
     def deck_score(self):
-        return sum((index+1)*value for index, value in enumerate(reversed(self.deck)))
+        return sum((index + 1) * value for index, value in enumerate(reversed(self.deck)))
 
 
 def parse_input(my_input: str):
@@ -93,4 +82,3 @@ def play_rounds(*players: Player, with_output=False):
 assert play_rounds(*parse_input(TEST_INPUT)) == 306
 
 print(play_rounds(*parse_input(PUZZLE_INPUT)))
-

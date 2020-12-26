@@ -1,22 +1,14 @@
 import collections
 import functools
-import heapq
-import itertools
 import math
-import operator
-from dataclasses import dataclass
-from numbers import Number
-from typing import Dict, Tuple, List
+import re
 
 import numpy as np
 
 import Utils
-from Utils import multiply, count
+from Utils import multiply
 from input import PUZZLE_INPUT, TEST_INPUT
 
-import sys
-
-import re
 
 # at least two sides need to fit to others
 # only the corner tiles (always 4) have only two sides fitting
@@ -101,10 +93,10 @@ class Tile(object):
         return all_possible_tiles
 
     def remove_borders(self):
-        new_tile_lines = np.ndarray((self.width-2, self.height-2), self.tile_lines.dtype)
-        for x in range(1, self.width-1):
-            for y in range(1, self.height-1):
-                new_tile_lines[x-1, y-1] = self.tile_lines[x, y]
+        new_tile_lines = np.ndarray((self.width - 2, self.height - 2), self.tile_lines.dtype)
+        for x in range(1, self.width - 1):
+            for y in range(1, self.height - 1):
+                new_tile_lines[x - 1, y - 1] = self.tile_lines[x, y]
         return Tile(self.tile_number, new_tile_lines)
 
 
@@ -209,7 +201,7 @@ class TilesSolver(object):
                             assert len(self.tile_possibilities[x, y]) >= 1
                     prev_x, prev_y = x, y
                     if len({tile.tile_number for tile in self.tile_possibilities[x, y]}) == 1:
-                        if len(self.tile_possibilities[x, y]) == 2 and (x,y) == (0,0):
+                        if len(self.tile_possibilities[x, y]) == 2 and (x, y) == (0, 0):
                             self.tile_possibilities[x, y] = {list(self.tile_possibilities[x, y])[1]}
                         self.remove_used_tile_number(x, y)
         if all(len(self.tile_possibilities[x, y]) == 2 for x in range(self.width) for y in range(self.height)):
@@ -221,7 +213,7 @@ class TilesSolver(object):
         tile_array = np.ndarray((self.width, self.height), Tile)
         for x in range(self.width):
             for y in range(self.height):
-                tile_array[x,y] = list(self.get_tile_possibilities(x, y))[0]
+                tile_array[x, y] = list(self.get_tile_possibilities(x, y))[0]
         return tile_array
 
     def remove_borders(self, tile_array):
@@ -232,10 +224,10 @@ class TilesSolver(object):
 
     def get_image(self, tile_array):
         image = []
-        for line in range((tile_array.shape[0]*tile_array.shape[1])-1):
+        for line in range((tile_array.shape[0] * tile_array.shape[1]) - 1):
             for y in range(tile_array.shape[1]):
                 for x in range(tile_array.shape[0]):
-                    image.append(''.join(tile_array[x,y].tile_lines[line]))
+                    image.append(''.join(tile_array[x, y].tile_lines[line]))
                 image.append('\n')
         return ''.join(image)
 
@@ -312,7 +304,6 @@ assert test_input_solver.get_result_1st() == (1951 * 3079 * 2971 * 1171), \
 
 test_input_solver.remove_wrong_possibilities()
 test_input_solver.get_image(test_input_solver.remove_borders(test_input_solver.get_tile_array()))
-
 
 tiles_solver = TilesSolver(parse_input(PUZZLE_INPUT))
 print(tiles_solver.get_result_1st())

@@ -19,7 +19,9 @@ def get_jolt_differences(adapter_list):
             for index, next_adapter in enumerate(remaining_adapter_list):
                 jolt_difference = next_adapter - curr_adapter
                 if 1 <= jolt_difference <= 3:
-                    result = get_jolt_differences_rec(next_adapter, remaining_adapter_list[0:index] + remaining_adapter_list[index + 1:],
+                    result = get_jolt_differences_rec(next_adapter,
+                                                      remaining_adapter_list[0:index]
+                                                      + remaining_adapter_list[index + 1:],
                                                       sorted_adapter_list + [(curr_adapter, jolt_difference)])
                     if result:
                         return result
@@ -136,11 +138,11 @@ def get_jolt_combination_amount_fast(my_input):
 def get_jolt_combination_amount_very_fast(my_input):
     my_input = [0] + my_input
     combinations_count = collections.Counter()
-    combinations_count[len(my_input)-1] = 1
+    combinations_count[len(my_input) - 1] = 1
     # from from behind (start with len-2 since len-1 is already filled with 1)
     for start_index in reversed(range(len(my_input))):
         # now check from start_index until the end how many numbers could be removed
-        for end_index in range(start_index+1, len(my_input)):
+        for end_index in range(start_index + 1, len(my_input)):
             if my_input[end_index] - my_input[start_index] > 3:
                 break
             # if end_index still works / could be removed, increase the count by end_index counts

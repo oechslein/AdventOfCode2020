@@ -1,16 +1,6 @@
-import collections
-import operator
-from dataclasses import dataclass
-from numbers import Number
-from typing import Dict, Tuple
-
-import numpy as np
+import re
 
 from input import PUZZLE_INPUT, TEST_INPUT
-
-import sys
-
-import re
 
 
 class alt_list(list):

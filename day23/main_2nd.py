@@ -1,22 +1,10 @@
-import collections
-import functools
-import itertools
-import operator
+import cProfile
 import time
 from dataclasses import dataclass
-from numbers import Number
-from typing import Dict, Tuple, List, Optional
+from typing import Dict
 
-import numpy as np
-
-from Utils import multiply, count
 from input import PUZZLE_INPUT
 
-import sys
-
-import re
-
-import cProfile
 
 class Cup(int):
     pass
@@ -95,7 +83,7 @@ class CupCircle(object):
 
 TEST_INPUT = "389125467"
 
-#assert CupCircle(TEST_INPUT).play_rounds() == (934001 * 159792) == 149245887792, \
+# assert CupCircle(TEST_INPUT).play_rounds() == (934001 * 159792) == 149245887792, \
 #    CupCircle(TEST_INPUT).play_rounds()
 
 start_time = time.time()

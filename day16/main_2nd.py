@@ -21,7 +21,8 @@ class Rule(object):
 def parse_input(my_input_str: str):
     classes_str, my_ticket_str, nearby_tickets_str = my_input_str.strip().split('\n\n')
     rules = {((result := re.fullmatch(r'([^:]+): (\d+)-(\d+) or (\d+)-(\d+)', class_str))
-              and Rule(result.group(1), int(result.group(2)), int(result.group(3)), int(result.group(4)), int(result.group(5))))
+              and Rule(result.group(1), int(result.group(2)), int(result.group(3)), int(result.group(4)),
+                       int(result.group(5))))
              for class_str in classes_str.split('\n')}
     my_ticket = list(map(int, my_ticket_str.replace('your ticket:\n', '').split(',')))
     nearby_tickets = [tuple(map(int, nearby_ticket_str.split(',')))

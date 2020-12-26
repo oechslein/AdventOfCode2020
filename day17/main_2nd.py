@@ -42,7 +42,8 @@ class PocketDim(object):
 
     def neighbors(self, cell):
         distance = 1
-        for neighbor_cell in itertools.product(*(range(dim_value - distance, dim_value + distance + 1) for dim_value in cell)):
+        for neighbor_cell in itertools.product(*(range(dim_value - distance, dim_value + distance + 1)
+                                                 for dim_value in cell)):
             if cell != neighbor_cell:
                 yield neighbor_cell, self.seed_dict.get(neighbor_cell, False)
 
@@ -71,7 +72,7 @@ class PocketDim(object):
                 self.update_cell(new_seed_dict, cell, value)
 
                 # check if we need to add neighbor cells that became active (non existing cells are inactive)
-                assert count(self.neighbors(cell)) == (3**self.dimensions) - 1
+                assert count(self.neighbors(cell)) == (3 ** self.dimensions) - 1
                 for neighbor_cell, neighbor_value in self.neighbors(cell):
                     self.update_cell(new_seed_dict, neighbor_cell, neighbor_value)
 

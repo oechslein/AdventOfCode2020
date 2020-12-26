@@ -27,7 +27,9 @@ def parse_input(my_input_str: str):
                       for nearby_ticket_str in nearby_tickets_str.replace('nearby tickets:\n', '').split('\n')]
     return rules, my_ticket, nearby_tickets
 
+
 MULTIPLE_RESULT = False
+
 
 def get_invalid_ticket_numbers(rules: Set[Rule], my_ticket, nearby_tickets: List[List[int]]):
     del my_ticket

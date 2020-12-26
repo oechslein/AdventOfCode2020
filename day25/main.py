@@ -1,24 +1,3 @@
-import abc
-import cProfile
-import collections
-import functools
-import itertools
-import operator
-import time
-from dataclasses import dataclass
-from numbers import Number
-from typing import Dict, Tuple, List, Optional, ClassVar, Set
-
-import numpy as np
-
-from Utils import multiply, count
-from input import PUZZLE_INPUT
-
-import sys
-
-import re
-
-
 def transform(subject_number: int, loop_size: int) -> int:
     value = 1
     for _ in range(loop_size):
@@ -37,6 +16,7 @@ encryption_key = 14897079
 assert transform(public_key_door, 8) == encryption_key
 assert transform(public_key_card, 11) == encryption_key
 
+
 def calc_loop_sizes(subject_number: int):
     value = 1
     loop_size = 1
@@ -45,6 +25,7 @@ def calc_loop_sizes(subject_number: int):
         value %= 20201227
         yield loop_size, value
         loop_size += 1
+
 
 def find_loop_sizes(subject_number: int, *values_to_find: int):
     loop_sized = []

@@ -1,23 +1,9 @@
-import collections
 import functools
-import heapq
-import itertools
-import math
-import operator
-from dataclasses import dataclass
-from numbers import Number
-from typing import Dict, Tuple, List
 
 from frozendict import frozendict
-import numpy as np
 
 import Utils
-from Utils import multiply, count
-from input import PUZZLE_INPUT, TEST_INPUT
-
-import sys
-
-import re
+from input import PUZZLE_INPUT
 
 
 class TileSolver(object):

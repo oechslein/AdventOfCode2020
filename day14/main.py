@@ -1,17 +1,14 @@
 import collections
-import time
-from typing import Union, List, Optional
-
-import numpy as np
-
 import re
-from Utils import multiply
-from input import TEST_INPUT, PUZZLE_INPUT
+from typing import Union, List, Optional
 
 import bitstring
 
+from input import TEST_INPUT, PUZZLE_INPUT
+
 MaskInputType = collections.namedtuple('MaskInputType', ['mask_0', 'mask_1'])
 MemInputType = collections.namedtuple('MemInputType', ['mem_addr', 'mem_value'])
+
 
 def parse_input(my_input_str: str) -> List[Union[MaskInputType, MemInputType]]:
     my_input_list = []
@@ -24,8 +21,8 @@ def parse_input(my_input_str: str) -> List[Union[MaskInputType, MemInputType]]:
         else:
             result = re.fullmatch(r'mem\[(\d+)\] = (\d+)', my_input_str)
             mem_addr = int(result[1])
-            bit_str = bin(int(result[2])).replace('0b','')
-            bit_str = ('0' * (36-len(bit_str))) + bit_str
+            bit_str = bin(int(result[2])).replace('0b', '')
+            bit_str = ('0' * (36 - len(bit_str))) + bit_str
             assert len(bit_str) == 36
             mem_value = bitstring.BitArray(bin=bit_str)
             my_input_list.append(MemInputType(mem_addr, mem_value))

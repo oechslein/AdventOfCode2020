@@ -1,19 +1,11 @@
-import collections
 import functools
-import itertools
-import operator
-from dataclasses import dataclass
-from numbers import Number
-from typing import Dict, Tuple, List
+import re
+from typing import List
 
 import numpy as np
 
-from Utils import multiply, count
+from Utils import multiply
 from input import PUZZLE_INPUT, TEST_INPUT
-
-import sys
-
-import re
 
 
 # at least two sides need to fit to others

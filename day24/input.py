@@ -1,4 +1,3 @@
-
 PUZZLE_INPUT = """
 wwwnwsenwnwnwnwnwnewnewsewnwnwnww
 nenwnwnewnweewsenwenwnwwswwnwswsw

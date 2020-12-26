@@ -1,4 +1,3 @@
-import itertools
 from functools import reduce
 
 from day5_input import puzzle_input
@@ -50,5 +49,7 @@ def calc_seat_id(seat_code):
 print(max(calc_seat_id(seat_code) for seat_code in puzzle_input.strip().split('\n')))
 
 seat_ids_in_list = list(sorted(calc_seat_id(seat_code) for seat_code in puzzle_input.strip().split('\n')))
-possible_seat_ids = [curr_seat + 1 for curr_seat, next_seat in zip(seat_ids_in_list, seat_ids_in_list[1:]) if next_seat != curr_seat + 1]
+possible_seat_ids = [curr_seat + 1
+                     for curr_seat, next_seat in zip(seat_ids_in_list, seat_ids_in_list[1:])
+                     if next_seat != curr_seat + 1]
 print(possible_seat_ids)

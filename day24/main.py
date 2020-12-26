@@ -1,22 +1,8 @@
-import abc
-import cProfile
-import collections
-import functools
-import itertools
-import operator
-import time
 from dataclasses import dataclass
-from numbers import Number
-from typing import Dict, Tuple, List, Optional, ClassVar
+from typing import Dict, Tuple, List, ClassVar
 
-import numpy as np
-
-from Utils import multiply, count
 from input import PUZZLE_INPUT
 
-import sys
-
-import re
 
 @dataclass
 class Tile(object):
@@ -49,12 +35,14 @@ class Tile(object):
             y += y_diff
         return x, y
 
+
 def parse_line(line):
     mapping = {"se": "x", "sw": "y", "nw": "a", "ne": "b", "w": "w", "e": "e"}
     reverse_map = {exchange: direction for direction, exchange in mapping.items()}
     for direction, exchange in mapping.items():
         line = line.replace(direction, exchange)
     return [reverse_map[direction] for direction in line]
+
 
 def parse_input(my_input: str):
     return [parse_line(line) for line in my_input.strip().split('\n')]
@@ -64,7 +52,6 @@ assert parse_line("sesenwnene") == ["se", "se", "nw", "ne", "ne"]
 
 assert parse_line("wwwnwsenwnwnwnwnwnewnewsewnwnwnww") == ["w", "w", "w", "nw", "se", "nw", "nw", "nw", "nw", "nw",
                                                            "ne", "w", "ne", "w", "se", "w", "nw", "nw", "nw", "w"]
-
 
 
 def calc(directions_list: List[List[str]]):
@@ -78,6 +65,7 @@ def calc(directions_list: List[List[str]]):
         else:
             all_tiles[(x, y)] = Tile(x, y, False)
     return sum(tile.black for tile in all_tiles.values())
+
 
 TEST_INPUT = """
 sesenwnenenewseeswwswswwnenewsewsw

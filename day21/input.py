@@ -5,7 +5,6 @@ sqjhc fvjkl (contains soy)
 sqjhc mxmxvkd sbzzf (contains fish)
 """
 
-
 PUZZLE_INPUT = """
 tbhvhts svgvj tzrr ntf ztxcfk cbtj dqm fqxrnb vffrd bng gzdd hsksz mbqjp hqgqj dslsr ltnn nphgmvq zztxx fmpgn gngsj khcpbp pvj rgzxvmm spl qzbdrdld nvxmt kbsvnrg gqq lszzpd blsbfm jmdvns sfkjp znpdll hmf mrvfl qnhmtl fxzrtc jzdxnfz tpnnkc lsqdbr qxhgg rrkxhrk vhxv lrjd plhdqp glqp rnnbl xchh kkckj ddzfclp hrshrqc ldzm qzzzf zvcj zqgvjdzl jqgq jdgq pjgfv szjksv kdnkc xlhpmb cjlsr rznqft sp ltqp gzmzct bnnbt jqp zglx (contains sesame, eggs)
 dslsr gzdd dvmqdg lbld phprpb lszzpd lfchd jzdxnfz sp hzlx xznpnl gqq stkh bddrzv hqgqj tpnnkc rgzxvmm zxzkjf fxzrtc xlhpmb zztxx jjf ltnn gcjsp rnnbl hrshrqc nskbkb rqgtxh xqmtfv sbxl gzmzct vcjnrghz blsbfm tkcxj sfkjp zglx gtdm vtpjk nrlgqvg hmxpx xhpmb rh bxjvzk ggkvzb khcpbp pmqvjv zqkxm vpp dsjfg qgllc fjqzh vvxrnc nqds fxnk gqm pvj szjksv cphvh spl nphgmvq nbmftn hsksz qzzzf zq znpdll zmkkb pctckzgp czfmtt lsnmldh (contains sesame, fish, eggs)

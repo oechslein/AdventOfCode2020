@@ -31,7 +31,8 @@ def count_bags_that_contain(bag_dict, color_to_find):
 
 print(parse_input(TEST_INPUT))
 MY_BAG_COLOR = 'shiny gold'
-assert count_bags_that_contain(parse_input(TEST_INPUT), MY_BAG_COLOR) == 4, count_bags_that_contain(parse_input(TEST_INPUT), MY_BAG_COLOR)
+assert count_bags_that_contain(parse_input(TEST_INPUT), MY_BAG_COLOR) == 4, \
+    count_bags_that_contain(parse_input(TEST_INPUT), MY_BAG_COLOR)
 print(count_bags_that_contain(parse_input(PUZZLE_INPUT), MY_BAG_COLOR))
 
 
@@ -39,7 +40,8 @@ print(count_bags_that_contain(parse_input(PUZZLE_INPUT), MY_BAG_COLOR))
 
 def count_bags(bag_dict, color_to_find):
     def count_bags_rec(curr_color_to_find):
-        return 1 + sum(amount * count_bags_rec(inner_color) for inner_color, amount in bag_dict[curr_color_to_find].items())
+        return 1 + sum(amount * count_bags_rec(inner_color)
+                       for inner_color, amount in bag_dict[curr_color_to_find].items())
 
     return count_bags_rec(color_to_find) - 1
 

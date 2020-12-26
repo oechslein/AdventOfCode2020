@@ -1,4 +1,3 @@
-
 PUZZLE_INPUT = """
 Player 1:
 45

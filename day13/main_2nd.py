@@ -128,5 +128,5 @@ def aha_solution(my_input: List[BusType], start_t=0):
 
 
 assert aha_solution(parse_input(TEST_INPUT)[1]) == 1068781
-#print('AHA Solution mit AHA', aha_solution(parse_input(PUZZLE_INPUT_AHA)[1], start_t=1010182346200000))
+# print('AHA Solution mit AHA', aha_solution(parse_input(PUZZLE_INPUT_AHA)[1], start_t=1010182346200000))
 # 1010182346291467

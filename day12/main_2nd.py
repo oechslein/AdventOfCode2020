@@ -1,11 +1,8 @@
-import collections
 import math
-import time
+import re
 
 import numpy as np
 
-import re
-from Utils import multiply
 from input import TEST_INPUT, PUZZLE_INPUT
 
 
